@@ -113,19 +113,19 @@ OPC_VM_IPV6_ONLY_SECONDARY_VNIC_RESPONSE_ULA = """\
 [
   {
     "ipv6Addresses": [
-      "fdbd:dccd:cde6:1000:0001:0002:0003:0004"
+      "fdbd:dccd:cde6:1000:0001:0002:0003:0005"
     ],
-    "ipv6VirtualRouterIp": "fe80::200:0002:0001:0003",
+    "ipv6VirtualRouterIp": "fe80::200:17ff:fe40:8972",
     "macAddr": "02:00:17:0D:6B:BE",
     "nicIndex": 0,
-    "vlanTag": 0,
+    "vlanTag": 929,
     "vnicId": "ocid1.vnic.oc1.iad.abuwcljtr2b6363afca55nzerlvwmfhxp_truncated"
   },
   {
     "ipv6Addresses": [
       "fdbd:dccd:cde6:1000:0001:0002:0003:0006"
     ],
-    "ipv6VirtualRouterIp": "fe80::200:0002:0001:0005",
+    "ipv6VirtualRouterIp": "fe80::200:17ff:fe40:8972",
     "macAddr": "02:00:17:18:F6:FF",
     "nicIndex": 1,
     "subnetCidrBlock": "\u003cnull\u003e",
