@@ -116,7 +116,7 @@ OPC_VM_IPV6_ONLY_SECONDARY_VNIC_RESPONSE_ULA = """\
       "fdbd:dccd:cde6:1000:0001:0002:0003:0004"
     ],
     "ipv6VirtualRouterIp": "fe80::200:0002:0001:0003",
-    "macAddr": "94:00:00:00:00:00",
+    "macAddr": "02:00:17:0D:6B:BE",
     "nicIndex": 0,
     "vlanTag": 0,
     "vnicId": "ocid1.vnic.oc1.iad.abuwcljtr2b6363afca55nzerlvwmfhxp_truncated"
@@ -126,7 +126,7 @@ OPC_VM_IPV6_ONLY_SECONDARY_VNIC_RESPONSE_ULA = """\
       "fdbd:dccd:cde6:1000:0001:0002:0003:0006"
     ],
     "ipv6VirtualRouterIp": "fe80::200:0002:0001:0005",
-    "macAddr": "94:00:00:00:00:01",
+    "macAddr": "02:00:17:18:F6:FF",
     "nicIndex": 1,
     "subnetCidrBlock": "\u003cnull\u003e",
     "vlanTag": 2659,
@@ -664,8 +664,8 @@ class TestNetworkConfigFromOpcImds:
         with mock.patch(
             f"{DS_PATH}.get_interfaces_by_mac",
             return_value={
-                "94:00:00:00:00:00": "ens3",
-                "94:00:00:00:00:01": "ens4",
+                "02:00:17:0D:6B:BE": "ens3",
+                "02:00:17:18:F6:FF": "ens4",
             },
         ):
             oracle_ds._add_network_config_from_opc_imds(
@@ -679,7 +679,7 @@ class TestNetworkConfigFromOpcImds:
 
             assert primary_cfg["dhcp4"] is False
             assert primary_cfg["dhcp6"] is True
-            assert "94:00:00:00:00:00" == primary_cfg["match"]["macaddress"]
+            assert "02:00:17:0D:6B:BE" == primary_cfg["match"]["macaddress"]
             assert 9000 == primary_cfg["mtu"]
             assert "addresses" not in primary_cfg
 
@@ -687,7 +687,7 @@ class TestNetworkConfigFromOpcImds:
         secondary_cfg = nic_cfg["ens4"]
         assert secondary_cfg["dhcp4"] is False
         assert secondary_cfg["dhcp6"] is False
-        assert "94:00:00:00:00:01" == secondary_cfg["match"]["macaddress"]
+        assert "02:00:17:18:F6:FF" == secondary_cfg["match"]["macaddress"]
         assert 9000 == secondary_cfg["mtu"]
 
         assert 1 == len(secondary_cfg["addresses"])
