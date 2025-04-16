@@ -109,6 +109,30 @@ OPC_VM_IPV6_ONLY_SECONDARY_VNIC_RESPONSE = """\
     "vnicId": "ocid1.vnic.oc1.iad.abuwcljtpfktyl2e3xm2ez4spj7wiliyc_truncated"
   }
 ]"""
+OPC_VM_IPV6_ONLY_SECONDARY_VNIC_RESPONSE_ULA = """\
+[
+  {
+    "ipv6Addresses": [
+      "fdbd:dccd:cde6:1000:0001:0002:0003:0004"
+    ],
+    "ipv6VirtualRouterIp": "fe80::200:0002:0001:0003",
+    "macAddr": "94:00:00:00:00:00",
+    "nicIndex": 0,
+    "vlanTag": 0,
+    "vnicId": "ocid1.vnic.oc1.iad.abuwcljtr2b6363afca55nzerlvwmfhxp_truncated"
+  },
+  {
+    "ipv6Addresses": [
+      "fdbd:dccd:cde6:1000:0001:0002:0003:0006"
+    ],
+    "ipv6VirtualRouterIp": "fe80::200:0002:0001:0005",
+    "macAddr": "94:00:00:00:00:01",
+    "nicIndex": 1,
+    "subnetCidrBlock": "\u003cnull\u003e",
+    "vlanTag": 2659,
+    "vnicId": "ocid1.vnic.oc1.iad.abuwcljtpfktyl2e3xm2ez4spj7wiliyc_truncated"
+  }
+]"""
 ###############################################################################
 
 OPC_DUAL_STACK_VM_VNIC_RESPONSE = """\
@@ -622,6 +646,53 @@ class TestNetworkConfigFromOpcImds:
         assert 1 == len(secondary_cfg["addresses"])
         assert (
             "2603:c020:400d:5d7e:aacc:8e5f:3b1b:3a4a/128"
+            == secondary_cfg["addresses"][0]
+        )
+
+    @pytest.mark.parametrize(
+        "set_primary",
+        [True, False],
+    )
+    def test_secondary_nic_v2_ipv6_only_ula(self, set_primary, oracle_ds):
+        oracle_ds._vnics_data = json.loads(
+            OPC_VM_IPV6_ONLY_SECONDARY_VNIC_RESPONSE_ULA
+        )
+        oracle_ds._network_config = {
+            "version": 2,
+            "ethernets": {"primary": {"nic": {}}},
+        }
+        with mock.patch(
+            f"{DS_PATH}.get_interfaces_by_mac",
+            return_value={
+                "94:00:00:00:00:00": "ens3",
+                "94:00:00:00:00:01": "ens4",
+            },
+        ):
+            oracle_ds._add_network_config_from_opc_imds(
+                set_primary=set_primary
+            )
+
+        nic_cfg = oracle_ds.network_config["ethernets"]
+        if set_primary:
+            assert "ens3" in nic_cfg
+            primary_cfg = nic_cfg["ens3"]
+
+            assert primary_cfg["dhcp4"] is False
+            assert primary_cfg["dhcp6"] is True
+            assert "94:00:00:00:00:00" == primary_cfg["match"]["macaddress"]
+            assert 9000 == primary_cfg["mtu"]
+            assert "addresses" not in primary_cfg
+
+        assert "ens4" in nic_cfg
+        secondary_cfg = nic_cfg["ens4"]
+        assert secondary_cfg["dhcp4"] is False
+        assert secondary_cfg["dhcp6"] is False
+        assert "94:00:00:00:00:01" == secondary_cfg["match"]["macaddress"]
+        assert 9000 == secondary_cfg["mtu"]
+
+        assert 1 == len(secondary_cfg["addresses"])
+        assert (
+            "fdbd:dccd:cde6:1000:0001:0002:0003:0006/128"
             == secondary_cfg["addresses"][0]
         )
 
